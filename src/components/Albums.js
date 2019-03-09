@@ -32,7 +32,7 @@ class Album extends Component {
 
   setSong(song) {
     this.audioElement.src = song.audioSrc;
-    this.SetState({ currentSong: song });
+    this.setState({ currentSong: song });
   }
 
   handleSongClick(song) {
