@@ -14,6 +14,8 @@ class Album extends Component {
     this.state ={
       album: album,
       currentSong: album.songs[0],
+      currentTime: 0,
+      duration: album.songs[0].duration,
       isPlaying: false,
       isHovered: false,
       playAndPauseButton: <ion-icon name="play"></ion-icon>
@@ -21,6 +23,26 @@ class Album extends Component {
 
     this.audioElement = document.createElement('audio');
     this.audioElement.src = album.songs[0].audioSrc;
+  }
+
+  componentDidMount() {
+    this.eventListeners = {
+      timeupdate: e => {
+        this.setState({ currentTime: this.audioElement.currentTime });
+      },
+      durationchange: e => {
+        this.setState({ duration: this.audioElement.duration });
+      }
+    };
+    this.audioElement.addEventListener('timeupdate', this.eventListeners.timeupdate);
+    this.audioElement.addEventListener('durationchange', this.eventListeners.durationchange);
+  }
+
+  componentWillUnmount() {
+    this.audioElement.src = null;
+    this.audioElement = null;
+    this.audioElement.removeEventListener('timeupdate', this.eventListeners.timeupdate);
+    this.audioElement.removeEventListener('durationchange', this.eventListeners.durationchange);
   }
 
   play() {
@@ -64,6 +86,18 @@ class Album extends Component {
     this.play();
   }
 
+  getSongPlayButton(index, song) {
+    if (song === this.state.currentSong && this.state.isPlaying) {
+      return <span className="icon ion-md-pause"></span>
+    }
+
+    if (this.state.isHovered === index+1) {
+      return <span className="icon ion-md-play"></span>
+    }
+
+    return <span className="song-number">{index+1}</span>
+  }
+
   render() {
     return (
       <section className="album">
@@ -88,15 +122,8 @@ class Album extends Component {
                   onMouseLeave={() => this.setState({ isHovered: false })} >
                 <td className="song-actions">
                   <button id="action_buttons">
-                    {(this.state.currentSong.title === song.title ) ?
-                      <span className={this.state.isPlaying ? "ion-pause" : "ion-play"}></span>
-                      :
-                      (this.state.isHovered === index+1) ?
-                      <span className="ion-play"></span>
-                      :
-                      <span className="song-number">{index+1}</span>
-                    }
-                    </button>
+                    {this.getSongPlayButton(index, song)}
+                  </button>
                 </td>
                 <td className="song-title">{song.title} </td>
                 <td className="song-duration">{song.duration} </td>
@@ -107,6 +134,8 @@ class Album extends Component {
         <PlayerBar
           isPlaying={this.state.isPlaying}
           currentSong={this.state.currentSong}
+          currentTime={this.audioElement.currentTime}
+          duration={this.audioElement.duration}
           handleSongClick={() => this.handleSongClick(this.state.currentSong)}
           handlePrevClick={() => this.handlePrevClick()}
           handleNextClick={() => this.handleNextClick()}
