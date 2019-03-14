@@ -13,7 +13,9 @@ class Album extends Component {
     this.state ={
       album: album,
       currentSong: album.songs[0],
-      isPlaying: false
+      isPlaying: false,
+      isHovered: false,
+      playAndPauseButton: <ion-icon name="play"></ion-icon>
     };
 
     this.audioElement = document.createElement('audio');
@@ -49,9 +51,7 @@ class Album extends Component {
     return (
       <section className="album">
         <section id="album-info">
-          <img id="album-cover-art"
-               src={this.state.album.albumCover}
-               alt={this.state.album.title} />
+          <img id="album-cover-art" src={this.state.album.albumCover}/>
           <div className="album-details">
             <h1 id="album-title">{this.state.album.title}</h1>
             <h2 className="artist">{this.state.album.artist}</h2>
@@ -66,10 +66,23 @@ class Album extends Component {
           </colgroup>
           <tbody>
             {this.state.album.songs.map( (song, index) =>
-              <tr className={song} key={index} onClick={() => this.handleSongClick(song)} >
-                <td className="song-number">{index+1}</td>
-                <td className="song-title">{song.title}</td>
-                <td className="song-duration">{song.duration}</td>
+              <tr className="song" key={index} onClick={() => this.handleSongClick(song)}
+                  onMouseEnter={() => this.setState({ isHovered: index+1 })}
+                  onMouseLeave={() => this.setState({ isHovered: false })} >
+                <td className="song-actions">
+                  <button id="action_buttons">
+                    {(this.state.currentSong.title === song.title ) ?
+                      <span className={this.state.isPlaying ? "icon ion-md-pause" : "icon ion-md-play"}></span>
+                      :
+                      (this.state.isHovered === index+1) ?
+                      <span className="icon ion-md-play"></span>
+                      :
+                      <span className="song-number">{index+1}</span>
+                    }
+                    </button>
+                </td>
+                <td className="song-title">{song.title} </td>
+                <td className="song-duration">{song.duration} </td>
               </tr>
             )}
           </tbody>
